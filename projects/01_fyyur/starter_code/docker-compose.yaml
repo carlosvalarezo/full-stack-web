@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  db:
+    image: "postgres"
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=fyyur
+      - POSTGRES_USER=fyyur
+      - POSTGRES_PASSWORD=fyyur
+    container_name: db
+  fyyur:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: carlosvalarezo/fyyur
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_APP=myapp
+      - FLASK_ENV=development
+    depends_on:
+      - db
+    volumes:
+      - .:/fyyur
+    command: tail -F /var/null
+    container_name: fyyur
