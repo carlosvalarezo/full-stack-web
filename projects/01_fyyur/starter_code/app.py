@@ -147,7 +147,6 @@ def search_venues():
         "count": count,
         "data": data
     }
-    print(response)
     return render_template('pages/search_venues.html', results=response,
                            search_term=request.form.get('search_term', ''))
 
