@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   db:
-    image: "postgres"
+    image: postgres:9.6-alpine
     ports:
       - 5432:5432
     volumes:
@@ -19,7 +19,7 @@ services:
     ports:
       - 5000:5000
     environment:
-      - FLASK_APP=myapp
+      - FLASK_APP=app
       - FLASK_ENV=development
       - PORT=5000
       - DB_NAME=fyyur
