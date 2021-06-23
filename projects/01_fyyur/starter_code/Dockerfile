@@ -1,7 +1,9 @@
-FROM python:3.9.0-alpine3.12
+FROM python:3.6-alpine
 
 RUN apk update && apk upgrade
-RUN apk add --no-cache python3-dev g++ gcc gpgme-dev libc-dev musl-dev nodejs npm
+RUN apk add --no-cache postgresql-libs postgresql-dev
+RUN apk add --virtual .build-deps python3-dev g++ gcc gpgme-dev libc-dev musl-dev curl nodejs npm
+
 
 RUN addgroup --system pythonuser -g 1001
 RUN adduser --system -g pythonuser --uid 1001 pythonuser
@@ -17,4 +19,8 @@ USER 1001
 
 RUN python -m pip install -r /fyyur/requirements.txt
 
-ENTRYPOINT ["python", "app.py"]
+RUN npm install bootstrap@3
+
+EXPOSE 5000
+
+ENTRYPOINT ["python", "app.py", "-h", "0.0.0.0"]
