@@ -29,7 +29,7 @@ services:
       - DB_HOST=db
     depends_on:
       - db
-    restart: on-failure:10
+    restart: on-failure:20
     volumes:
       - .:/fyyur
     container_name: fyyur
