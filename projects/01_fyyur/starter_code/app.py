@@ -11,6 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
+from flask_migrate import Migrate
 from forms import *
 import os
 
@@ -22,6 +23,7 @@ app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 # ----------------------------------------------------------------------------#
@@ -39,6 +41,10 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    genres = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
+    seeking_talent = db.Column(db.Boolean, default=False)
+    seeking_description = db.Column(db.String(1000))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -54,11 +60,11 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
+    seeking_venue = db.Column(db.Boolean, default=False)
+    seeking_description = db.Column(db.String(1000))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-
-db.create_all()
 
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -82,6 +88,24 @@ app.jinja_env.filters['datetime'] = format_datetime
 # ----------------------------------------------------------------------------#
 # Controllers.
 # ----------------------------------------------------------------------------#
+@app.route('/populate')
+def populate():
+    venue_one = Venue(city="San Francisco", name="Infinity", state="CA")
+    venue_two = Venue(city="New York", name="Pulse", state="NY")
+    venue_three = Venue(city="Phoenix", name="Excel", state="AZ")
+    venue_four = Venue(city="Springfield", name="Ride", state="IL")
+    venue_five = Venue(city="Montgomery", name="Revolution", state="AL")
+    venue_six = Venue(city="Juneau", name="Mixed", state="AK")
+    venue_seven = Venue(city="Indianapolis", name="Scribed", state="IN")
+    venue_eight = Venue(city="Annapolis", name="Mussara", state="MD")
+    venue_nine = Venue(city="Jackson", name="Mussio", state="MS")
+    venue_ten = Venue(city="Helena", name="Vinyl", state="MT")
+    db.session.add_all([venue_one, venue_two, venue_three, venue_four,
+                        venue_five, venue_six, venue_seven, venue_eight,
+                        venue_nine, venue_ten])
+    db.session.commit()
+    return render_template('pages/populate.html')
+
 
 @app.route('/')
 def index():
@@ -116,6 +140,7 @@ def venues():
             "num_upcoming_shows": 0,
         }]
     }]
+    # data = Venue.query.all()
     return render_template('pages/venues.html', areas=data)
 
 
