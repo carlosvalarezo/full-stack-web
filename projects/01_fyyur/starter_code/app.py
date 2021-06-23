@@ -43,7 +43,7 @@ class Venue(db.Model):
     facebook_link = db.Column(db.String(120))
     genres = db.Column(db.String(120))
     website_link = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean, default=False)
+    seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(1000))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
@@ -88,24 +88,6 @@ app.jinja_env.filters['datetime'] = format_datetime
 # ----------------------------------------------------------------------------#
 # Controllers.
 # ----------------------------------------------------------------------------#
-@app.route('/populate')
-def populate():
-    venue_one = Venue(city="San Francisco", name="Infinity", state="CA")
-    venue_two = Venue(city="New York", name="Pulse", state="NY")
-    venue_three = Venue(city="Phoenix", name="Excel", state="AZ")
-    venue_four = Venue(city="Springfield", name="Ride", state="IL")
-    venue_five = Venue(city="Montgomery", name="Revolution", state="AL")
-    venue_six = Venue(city="Juneau", name="Mixed", state="AK")
-    venue_seven = Venue(city="Indianapolis", name="Scribed", state="IN")
-    venue_eight = Venue(city="Annapolis", name="Mussara", state="MD")
-    venue_nine = Venue(city="Jackson", name="Mussio", state="MS")
-    venue_ten = Venue(city="Helena", name="Vinyl", state="MT")
-    db.session.add_all([venue_one, venue_two, venue_three, venue_four,
-                        venue_five, venue_six, venue_seven, venue_eight,
-                        venue_nine, venue_ten])
-    db.session.commit()
-    return render_template('pages/populate.html')
-
 
 @app.route('/')
 def index():
@@ -119,28 +101,28 @@ def index():
 def venues():
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
-    data = [{
-        "city": "San Francisco",
-        "state": "CA",
-        "venues": [{
-            "id": 1,
-            "name": "The Musical Hop",
-            "num_upcoming_shows": 0,
-        }, {
-            "id": 3,
-            "name": "Park Square Live Music & Coffee",
-            "num_upcoming_shows": 1,
-        }]
-    }, {
-        "city": "New York",
-        "state": "NY",
-        "venues": [{
-            "id": 2,
-            "name": "The Dueling Pianos Bar",
-            "num_upcoming_shows": 0,
-        }]
-    }]
-    # data = Venue.query.all()
+    # data = [{
+    #     "city": "San Francisco",
+    #     "state": "CA",
+    #     "venues": [{
+    #         "id": 1,
+    #         "name": "The Musical Hop",
+    #         "num_upcoming_shows": 0,
+    #     }, {
+    #         "id": 3,
+    #         "name": "Park Square Live Music & Coffee",
+    #         "num_upcoming_shows": 1,
+    #     }]
+    # }, {
+    #     "city": "New York",
+    #     "state": "NY",
+    #     "venues": [{
+    #         "id": 2,
+    #         "name": "The Dueling Pianos Bar",
+    #         "num_upcoming_shows": 0,
+    #     }]
+    # }]
+    data = db.session.query(Venue)
     return render_template('pages/venues.html', areas=data)
 
 
@@ -175,7 +157,7 @@ def show_venue(venue_id):
         "phone": "123-123-1234",
         "website": "https://www.themusicalhop.com",
         "facebook_link": "https://www.facebook.com/TheMusicalHop",
-        "seeking_talent": True,
+        "seeking_venue": True,
         "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
         "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
         "past_shows": [{
@@ -198,7 +180,7 @@ def show_venue(venue_id):
         "phone": "914-003-1132",
         "website": "https://www.theduelingpianos.com",
         "facebook_link": "https://www.facebook.com/theduelingpianos",
-        "seeking_talent": False,
+        "seeking_venue": False,
         "image_link": "https://images.unsplash.com/photo-1497032205916-ac775f0649ae?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "past_shows": [],
         "upcoming_shows": [],
@@ -215,7 +197,7 @@ def show_venue(venue_id):
         "phone": "415-000-1234",
         "website": "https://www.parksquarelivemusicandcoffee.com",
         "facebook_link": "https://www.facebook.com/ParkSquareLiveMusicAndCoffee",
-        "seeking_talent": False,
+        "seeking_venue": False,
         "image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
         "past_shows": [{
             "artist_id": 5,
@@ -269,20 +251,21 @@ def create_venue_submission():
         facebook_link = request.form.get('facebook_link', '')
         image_link = request.form.get('image_link', '')
         website_link = request.form.get('website_link', '')
-        seeking_talent = request.form.get('seeking_talent', '')
-        if seeking_talent == 'y':
-            seeking_talent = True
-        if seeking_talent == 'n':
-            seeking_talent = False
+        seeking_venue = request.form.get('seeking_venue', '')
+        if seeking_venue == 'y':
+            seeking_venue = True
+        if seeking_venue == 'n':
+            seeking_venue = False
         seeking_description = request.form.get('seeking_description', '')
         venue = Venue(name=name, city=city, state=state, address=address, phone=phone, genres=genres,
                       facebook_link=facebook_link, image_link=image_link, website_link=website_link,
-                      seeking_talent=seeking_talent, seeking_description=seeking_description)
+                      seeking_venue=seeking_venue, seeking_description=seeking_description)
         db.session.add(venue)
         db.session.commit()
         # on successful db insert, flash success
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
     except Exception as e:
+        print(e)
         db.session.rollback()
         # TODO: on unsuccessful db insert, flash an error instead.
         # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
@@ -308,16 +291,17 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
     # TODO: replace with real data returned from querying the database
-    data = [{
-        "id": 4,
-        "name": "Guns N Petals",
-    }, {
-        "id": 5,
-        "name": "Matt Quevedo",
-    }, {
-        "id": 6,
-        "name": "The Wild Sax Band",
-    }]
+    data = db.session.query(Artist)
+    # data = [{
+    #     "id": 4,
+    #     "name": "Guns N Petals",
+    # }, {
+    #     "id": 5,
+    #     "name": "Matt Quevedo",
+    # }, {
+    #     "id": 6,
+    #     "name": "The Wild Sax Band",
+    # }]
     return render_template('pages/artists.html', artists=data)
 
 
@@ -460,7 +444,7 @@ def edit_venue(venue_id):
         "phone": "123-123-1234",
         "website": "https://www.themusicalhop.com",
         "facebook_link": "https://www.facebook.com/TheMusicalHop",
-        "seeking_talent": True,
+        "seeking_venue": True,
         "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
         "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
     }
@@ -491,10 +475,36 @@ def create_artist_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
 
-    # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+    try:
+        name = request.form.get('name', '')
+        city = request.form.get('city', '')
+        state = request.form.get('state', '')
+        phone = request.form.get('phone', '')
+        genres = request.form.get('genres', '')
+        facebook_link = request.form.get('facebook_link', '')
+        image_link = request.form.get('image_link', '')
+        website_link = request.form.get('website_link', '')
+        seeking_venue = request.form.get('seeking_venue', 'n')
+        if seeking_venue == 'y':
+            seeking_venue = True
+        if seeking_venue == 'n':
+            seeking_venue = False
+        seeking_description = request.form.get('seeking_description', '')
+        artist = Artist(name=name, city=city, state=state, phone=phone, genres=genres,
+                        facebook_link=facebook_link, image_link=image_link, website_link=website_link,
+                        seeking_venue=seeking_venue, seeking_description=seeking_description)
+        db.session.add(artist)
+        db.session.commit()
+        # on successful db insert, flash success
+        flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+        # TODO: on unsuccessful db insert, flash an error instead.
+        # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+        flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.')
+    finally:
+        db.session.close()
     return render_template('pages/home.html')
 
 
