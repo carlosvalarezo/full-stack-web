@@ -31,7 +31,7 @@ migrate = Migrate(app, db)
 # ----------------------------------------------------------------------------#
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'Venues'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -43,14 +43,14 @@ class Venue(db.Model):
     facebook_link = db.Column(db.String(120))
     genres = db.Column(db.String(120))
     website_link = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean)
+    seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(1000))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'Artists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -68,7 +68,7 @@ class Artist(db.Model):
 
 
 class Show(db.Model):
-    __tablename__ = "Show"
+    __tablename__ = "Shows"
 
     id = db.Column(db.Integer, primary_key=True)
     venue_id = db.Column(db.Integer)
@@ -268,15 +268,15 @@ def create_venue_submission():
         facebook_link = request.form.get('facebook_link', '')
         image_link = request.form.get('image_link', '')
         website_link = request.form.get('website_link', '')
-        seeking_venue = request.form.get('seeking_venue', '')
-        if seeking_venue == 'y':
-            seeking_venue = True
-        if seeking_venue == 'n':
-            seeking_venue = False
+        seeking_talent = request.form.get('seeking_talent', '')
+        if seeking_talent == 'y':
+            seeking_talent = True
+        if seeking_talent == 'n':
+            seeking_talent = False
         seeking_description = request.form.get('seeking_description', '')
         venue = Venue(name=name, city=city, state=state, address=address, phone=phone, genres=genres,
                       facebook_link=facebook_link, image_link=image_link, website_link=website_link,
-                      seeking_venue=seeking_venue, seeking_description=seeking_description)
+                      seeking_talent=seeking_talent, seeking_description=seeking_description)
         db.session.add(venue)
         db.session.commit()
         # on successful db insert, flash success
