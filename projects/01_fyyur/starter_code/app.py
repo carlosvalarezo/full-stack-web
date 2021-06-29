@@ -3,14 +3,13 @@
 # ----------------------------------------------------------------------------#
 import datetime
 import json
+
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for
+from logging import Formatter, FileHandler
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-import logging
-from logging import Formatter, FileHandler
-from flask_wtf import Form
 from flask_migrate import Migrate
 
 from forms import *
@@ -30,22 +29,10 @@ migrate = Migrate(app, db)
 
 logging.basicConfig(level=logging.DEBUG)
 
+
 # ----------------------------------------------------------------------------#
 # Models.
 # ----------------------------------------------------------------------------#
-
-# order_items = db.Table('order_items',
-#                        db.Column('order_id', db.Integer, db.ForeignKey('order.id'), primary_key=True),
-#                        db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True)
-#                        )
-
-Show = db.Table('Shows',
-                db.Column('artist_id', db.Integer, db.ForeignKey('Artists.id'), primary_key=True),
-                db.Column('venue_id', db.Integer, db.ForeignKey('Venues.id'), primary_key=True),
-                db.Column('start_time', db.DateTime)
-                )
-
-
 class Venue(db.Model):
     __tablename__ = 'Venues'
 
@@ -61,7 +48,7 @@ class Venue(db.Model):
     website_link = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(1000))
-    shows = db.relationship('Artist', secondary=Show, backref=db.backref('Venue', lazy=True))
+    shows = db.relationship('Show', backref='Venue', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -80,8 +67,18 @@ class Artist(db.Model):
     website_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(1000))
+    shows = db.relationship('Show', backref='Artists', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
+
+
+class Show(db.Model):
+    __tablename__ = 'Shows'
+
+    id = db.Column(db.Integer, primary_key=True)
+    artist_id = db.Column(db.Integer, db.ForeignKey('Artists.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('Venues.id'), nullable=False)
+    start_time = db.Column(db.DateTime)
 
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -431,11 +428,6 @@ def show_artist(artist_id):
     #     "upcoming_shows_count": 3,
     # }
     data = Artist.query.filter(Artist.id == artist_id).first()
-    # venue_data = Artist
-
-    # data = Artist.join('Shows').filter(Artist.id == artist_id).first()
-
-    # select id, name, genres, FROM Artist JOIN SHOWS artist.id = shows.artis_id
     return render_template('pages/show_artist.html', artist=data)
 
 
@@ -604,9 +596,32 @@ def shows():
     # for da in data_venues:
     #     logging.debug("Artist name", da.name)
     #     logging.debug("Venue name", da.name)
-    data = {
 
-    }
+    # _shows = Venue.query.join(Show, Venue.id == Show.venue_id).with_entities(Venue.id.label('venue_id'),
+    #                                                              Venue.name.label('venue_name'),
+    #                                                              Artist.id.label('artist_id'),
+    #                                                              Artist.name.label('artist_name'),
+    #                                                              Artist.image_link.label('artist_image_link')).all()
+
+    shows_at_venue = Venue.query.join(Show, Venue.id == Show.venue_id).with_entities(Venue.id.label('venue_id'),
+                                                                                     Venue.name.label('venue_name'),
+                                                                                     Show.start_time.label('start_time'))
+
+    shows_by_artist = Artist.query.join(Show, Artist.id == Show.artist_id).with_entities(Artist.id.label('artist_id'),
+                                                                                         Artist.name.label(
+                                                                                             'artist_name'),
+                                                                                         Artist.image_link.label(
+                                                                                             'artist_image_link'))
+
+    data = []
+    for sv, sa in [(x, y) for x in shows_at_venue for y in shows_by_artist]:
+        data.append({"venue_id": sv['venue_id'],
+                     "venue_name": sv['venue_name'],
+                     "artist_id": sa['artist_id'],
+                     "artist_name": sa['artist_name'],
+                     "artist_image_link": sa['artist_image_link'],
+                     "start_time": str(sv['start_time'])})
+    logging.debug(data)
     return render_template('pages/shows.html', shows=data)
 
 
@@ -632,7 +647,7 @@ def create_show_submission():
         # on successful db insert, flash success
         flash('Show was successfully listed!')
     except Exception as e:
-        print(e)
+        logging.error(e)
         db.session.rollback()
         # TODO: on unsuccessful db insert, flash an error instead.
         # e.g., flash('An error occurred. Show could not be listed.')
