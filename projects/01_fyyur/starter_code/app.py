@@ -97,10 +97,25 @@ def search_venues():
                            search_term=request.form.get('search_term', ''))
 
 
+def _format_generes(genres_param):
+    genres = []
+    genre = ""
+    for v in genres_param:
+        if v == '{' or v == '"':
+            continue
+        if v == ',' or v == '}':
+            genres.append(genre)
+            genre = ""
+        if v is not ',':
+            genre += v
+    return genres
+
+
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     past_shows_1 = []
     upcoming_shows_1 = []
+
     venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
     upcoming_shows = db.session.query(Venue, Show.start_time.label("start_time"), Artist.name.label("name"),
                                       Artist.id.label("id"), Artist.image_link.label("image_link")).filter(
@@ -110,9 +125,11 @@ def show_venue(venue_id):
                                   Artist.id.label("id"), Artist.image_link.label("image_link")).filter(
         Artist.id == venue_id).filter(Artist.id == Show.artist_id).filter(Venue.id == Show.venue_id).filter(
         Show.start_time < datetime.now())
-    data = dict(id=venue.id, name=venue.name, genres=venue.genres, city=venue.city, state=venue.state,
-                phone=venue.phone, facebook_link=venue.facebook_link, seeking_talent=venue.seeking_talent,
-                image_link=venue.image_link)
+    genres = _format_generes(venue.genres)
+    data = dict(id=venue.id, name=venue.name, genres=genres, address=venue.address, city=venue.city, state=venue.state,
+                phone=venue.phone, website_link=venue.website_link, facebook_link=venue.facebook_link,
+                seeking_talent=venue.seeking_talent,
+                image_link=venue.image_link, seeking_description=venue.seeking_description)
     for uc in upcoming_shows:
         upcoming_shows_obj = {
             "artist_id": uc.id,
@@ -190,29 +207,57 @@ def delete_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-    form = VenueForm()
-    venue = {
-        "id": 1,
-        "name": "The Musical Hop",
-        "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-        "address": "1015 Folsom Street",
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "123-123-1234",
-        "website": "https://www.themusicalhop.com",
-        "facebook_link": "https://www.facebook.com/TheMusicalHop",
-        "seeking_venue": True,
-        "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-        "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
-    }
-    # TODO: populate form with values from venue with ID <venue_id>
-    return render_template('forms/edit_venue.html', form=form, venue=venue)
+    venue_form = VenueForm()
+    venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
+    try:
+        venue_form.name.data = venue.name
+        venue_form.city.data = venue.city
+        venue_form.state.data = venue.state
+        venue_form.phone.data = venue.phone
+        venue_form.genres.data = venue.genres
+        venue_form.facebook_link.data = venue.facebook_link
+        venue_form.image_link.data = venue.image_link
+        venue_form.website_link.data = venue.website_link
+        venue_form.seeking_talent.data = venue.seeking_talent
+        venue_form.seeking_description.data = venue.seeking_description
+        flash(f'Artist {venue.name} was successfully updated!')
+    except Exception as e:
+        logging.error("A Debug Logging Message")(e)
+        db.session.rollback()
+        flash(f'Venue {venue.name} was unsuccessfully listed!')
+    finally:
+        db.session.close()
+    return render_template('forms/edit_venue.html', form=venue_form, venue=venue)
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
-    # TODO: take values from the form submitted, and update existing
-    # venue record with ID <venue_id> using the new attributes
+    venue_form = VenueForm()
+    venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
+    try:
+        venue.name = venue_form.name.data
+        venue.city = venue_form.city.data
+        venue.state = venue_form.state.data
+        venue.address = venue_form.address.data
+        venue.phone = venue_form.phone.data
+        venue.genres = venue_form.genres.data
+        venue.facebook_link = venue_form.facebook_link.data
+        venue.image_link = venue_form.image_link.data
+        venue.website_link = venue_form.website_link.data
+        seeking_talent = venue_form.seeking_talent.data
+        if seeking_talent == 'y':
+            venue.seeking_talent = True
+        if seeking_talent == 'n':
+            venue.seeking_talent = False
+        venue.seeking_description = venue_form.seeking_description.data
+        db.session.commit()
+        flash(f'Venue {venue.name} was successfully updated!')
+    except Exception as e:
+        logging.error("A Debug Logging Message")(e)
+        db.session.rollback()
+        flash(f'Venue {venue.name} was unsuccessfully listed!')
+    finally:
+        db.session.close()
     return redirect(url_for('show_venue', venue_id=venue_id))
 
 
@@ -220,7 +265,6 @@ def edit_venue_submission(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-    # TODO: replace with real data returned from querying the database
     data = db.session.query(Artist)
     return render_template('pages/artists.html', artists=data)
 
@@ -252,9 +296,10 @@ def show_artist(artist_id):
                                   Venue.id.label("id"), Venue.image_link.label("image_link")).filter(
         Artist.id == artist_id).filter(Artist.id == Show.artist_id).filter(Venue.id == Show.venue_id).filter(
         Show.start_time < datetime.now())
-    data = dict(id=artist.id, name=artist.name, genres=artist.genres, city=artist.city, state=artist.state,
-                phone=artist.phone, facebook_link=artist.facebook_link, seeking_venue=artist.seeking_venue,
-                image_link=artist.image_link)
+    genres = _format_generes(artist.genres)
+    data = dict(id=artist.id, name=artist.name, genres=genres, city=artist.city, state=artist.state,
+                phone=artist.phone, website_link=artist.website_link, facebook_link=artist.facebook_link, seeking_venue=artist.seeking_venue,
+                seeking_description=artist.seeking_description, image_link=artist.image_link)
     for uc in upcoming_shows:
         upcoming_shows_obj = dict(venue_id=uc.id, venue_name=uc.name, venue_image_link=uc.image_link,
                                   start_time=str(uc.start_time))
@@ -277,29 +322,52 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-    form = ArtistForm()
-    artist = {
-        "id": 4,
-        "name": "Guns N Petals",
-        "genres": ["Rock n Roll"],
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "326-123-5000",
-        "website": "https://www.gunsnpetalsband.com",
-        "facebook_link": "https://www.facebook.com/GunsNPetals",
-        "seeking_venue": True,
-        "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-        "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
-    }
-    # TODO: populate form with fields from artist with ID <artist_id>
-    return render_template('forms/edit_artist.html', form=form, artist=artist)
+    artist_form = ArtistForm()
+    artist = db.session.query(Artist).filter(Artist.id == artist_id).first()
+    try:
+        artist_form.name.data = artist.name
+        artist_form.city.data = artist.city
+        artist_form.state.data = artist.state
+        artist_form.phone.data = artist.phone
+        artist_form.genres.data = artist.genres
+        artist_form.facebook_link.data = artist.facebook_link
+        artist_form.image_link.data = artist.image_link
+        artist_form.website_link.data = artist.website_link
+        artist_form.seeking_venue.data = artist.seeking_venue
+        artist_form.seeking_description.data = artist.seeking_description
+        flash(f'Artist {artist.name} was successfully updated!')
+    except Exception as e:
+        logging.error("A Debug Logging Message")(e)
+        db.session.rollback()
+        flash(f'Artis {artist.name} was unsuccessfully listed!')
+    finally:
+        db.session.close()
+    return render_template('forms/edit_artist.html', form=artist_form, artist=artist)
 
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-    # TODO: take values from the form submitted, and update existing
-    # artist record with ID <artist_id> using the new attributes
-
+    artist_form = ArtistForm()
+    artist = db.session.query(Artist).filter(Artist.id == artist_id).first()
+    try:
+        artist.name = artist_form.name.data
+        artist.city = artist_form.city.data
+        artist.state = artist_form.state.data
+        artist.phone = artist_form.phone.data
+        artist.genres = artist_form.genres.data
+        artist.facebook_link = artist_form.facebook_link.data
+        artist.image_link = artist_form.image_link.data
+        artist.website_link = artist_form.website_link.data
+        artist.seeking_venue = artist_form.seeking_venue.data
+        artist.seeking_description = artist_form.seeking_description.data
+        db.session.commit()
+        flash(f'Artist {artist.name} was successfully updated!')
+    except Exception as e:
+        logging.error("A Debug Logging Message")(e)
+        db.session.rollback()
+        flash(f'Artis {artist.name} was unsuccessfully listed!')
+    finally:
+        db.session.close()
     return redirect(url_for('show_artist', artist_id=artist_id))
 
 
@@ -326,22 +394,16 @@ def create_artist_submission():
         image_link = artist_form.image_link.data
         website_link = artist_form.website_link.data
         seeking_venue = artist_form.seeking_venue.data
-        if seeking_venue == 'y':
-            seeking_venue = True
-        if seeking_venue == 'n':
-            seeking_venue = False
         seeking_description = artist_form.seeking_description.data
         artist = Artist(name=name, city=city, state=state, phone=phone, genres=genres,
                         facebook_link=facebook_link, image_link=image_link, website_link=website_link,
                         seeking_venue=seeking_venue, seeking_description=seeking_description)
         db.session.add(artist)
         db.session.commit()
-        # on successful db insert, flash success
         flash(f'Artist {name} was successfully listed!')
     except Exception as e:
         logging.error(e)
         db.session.rollback()
-        # TODO: on unsuccessful db insert, flash an error instead.
         flash(f'An error occurred. Artist {name} could not be listed.')
     finally:
         db.session.close()
