@@ -163,7 +163,8 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-    venue_form = VenueForm()
+    venue_form = VenueForm(request.form)
+    # venue_form = VenueForm()
     try:
         name = venue_form.name.data
         city = venue_form.city.data
@@ -298,7 +299,8 @@ def show_artist(artist_id):
         Show.start_time < datetime.now())
     genres = _format_generes(artist.genres)
     data = dict(id=artist.id, name=artist.name, genres=genres, city=artist.city, state=artist.state,
-                phone=artist.phone, website_link=artist.website_link, facebook_link=artist.facebook_link, seeking_venue=artist.seeking_venue,
+                phone=artist.phone, website_link=artist.website_link, facebook_link=artist.facebook_link,
+                seeking_venue=artist.seeking_venue,
                 seeking_description=artist.seeking_description, image_link=artist.image_link)
     for uc in upcoming_shows:
         upcoming_shows_obj = dict(venue_id=uc.id, venue_name=uc.name, venue_image_link=uc.image_link,
@@ -415,25 +417,24 @@ def create_artist_submission():
 
 @app.route('/shows')
 def shows():
-    shows_at_venue = Venue.query.join(Show, Venue.id == Show.venue_id).with_entities(Venue.id.label('venue_id'),
-                                                                                     Venue.name.label('venue_name'),
-                                                                                     Show.start_time.label(
-                                                                                         'start_time'))
-
-    shows_by_artist = Artist.query.join(Show, Artist.id == Show.artist_id).with_entities(Artist.id.label('artist_id'),
-                                                                                         Artist.name.label(
-                                                                                             'artist_name'),
-                                                                                         Artist.image_link.label(
-                                                                                             'artist_image_link'))
-
     data = []
-    for sv, sa in [(x, y) for x in shows_at_venue for y in shows_by_artist]:
-        data.append({"venue_id": sv['venue_id'],
-                     "venue_name": sv['venue_name'],
-                     "artist_id": sa['artist_id'],
-                     "artist_name": sa['artist_name'],
-                     "artist_image_link": sa['artist_image_link'],
-                     "start_time": str(sv['start_time'])})
+    shows_data = Show.query.join(Artist, Venue).with_entities(Venue.id.label('venue_id'),
+                                                              Venue.name.label('venue_name'),
+                                                              Show.start_time.label(
+                                                                  'start_time'),
+                                                              Artist.id.label('artist_id'),
+                                                              Artist.name.label(
+                                                                  'artist_name'),
+                                                              Artist.image_link.label(
+                                                                  'artist_image_link')
+                                                              ).all()
+    for s in shows_data:
+        data.append({"venue_id": s.venue_id,
+                     "venue_name": s.venue_name,
+                     "artist_id": s.artist_id,
+                     "artist_name": s.artist_name,
+                     "artist_image_link": s.artist_image_link,
+                     "start_time": str(s.start_time)})
     return render_template('pages/shows.html', shows=data)
 
 
