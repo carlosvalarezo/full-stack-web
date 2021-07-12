@@ -178,5 +178,10 @@ python3 app.py
 ```
 
 6. **Verify on the Browser**<br>
-Navigate to project homepage [http://127.0.0.1:5000/](http://127.0.0.1:5000/) or [http://localhost:5000](http://localhost:5000) 
+Navigate to project homepage [http://127.0.0.1:5000/](http://127.0.0.1:5000/) or [http://localhost:5000](http://localhost:5000)
 
+# **To run this project in local**<br>
+
+* Please execute ```docker-compose up --remove-orphans --force-recreate```
+* Then got into the container called fyyur with the command: ```docker exec fyyur -it ash```
+* Once inside the container please run ```python -m flask db upgrade``` to run all the migrations
