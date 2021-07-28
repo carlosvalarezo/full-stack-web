@@ -1,0 +1,49 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:9.6-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=trivia
+      - POSTGRES_USER=trivia
+      - POSTGRES_PASSWORD=trivia
+    container_name: trivia_db
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    image: carlosvalarezo/trivia_backend
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_APP=app
+      - FLASK_ENV=development
+      - PORT=5000
+      - DB_NAME=trivia
+      - DB_USER=trivia
+      - DB_PASSWORD=trivia
+      - DB_PORT=5432
+      - DB_HOST=db
+    depends_on:
+      - db
+    restart: on-failure:20
+    volumes:
+      - ./backend:/backend
+    container_name: trivia_backend
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    image: carlosvalarezo/trivia_frontend
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+    restart: on-failure:20
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
+    container_name: trivia_frontend
