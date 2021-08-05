@@ -1,6 +1,7 @@
 FROM python:3.8-slim-buster
 
 RUN apt update -y && apt upgrade -y
+RUN apt-get install -y postgresql-client
 RUN useradd --user-group --system --create-home --no-log-init pythonuser
 
 WORKDIR /backend

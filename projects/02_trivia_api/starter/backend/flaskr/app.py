@@ -1,10 +1,10 @@
+import json
 import os
 from flask import Flask, request, abort, jsonify
 # from flask_sqlalchemy import SQLAlchemy
-# from flask_cors import CORS
+from flask_cors import CORS
 # import random
-#
-# from models import setup_db, Question, Category
+from models import db, setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
@@ -12,22 +12,55 @@ QUESTIONS_PER_PAGE = 10
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    # setup_db(app)
+    setup_db(app)
+
+    CORS(app, resources={r"/*": {"origins": "*"}})
+
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        return response
 
     @app.route('/')
     def hello():
         return jsonify({'message': 'hello trivia!'})
 
+    @app.route('/categories')
+    def get_categories():
+        categories_data = db.session.query(Category)
+        formatted_categories = [category.format() for category in categories_data]
+        return jsonify({
+            'success': True,
+            'categories': formatted_categories
+        })
+
+    @app.route('/questions')
+    def get_questions():
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * QUESTIONS_PER_PAGE
+        end = start + QUESTIONS_PER_PAGE
+        questions_data = db.session.query(Question)
+        formatted_questions = [question.format() for question in questions_data]
+
+        return jsonify({
+            'success': True,
+            'questions': formatted_questions[start:end],
+            'total_questions': len(formatted_questions)
+        })
     '''
+    DONE
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     '''
 
     '''
+    DONE
     @TODO: Use the after_request decorator to set Access-Control-Allow
     '''
 
     '''
-    @TODO: 
+    @TODO:
+    DONE
     Create an endpoint to handle GET requests 
     for all available categories.
     '''
