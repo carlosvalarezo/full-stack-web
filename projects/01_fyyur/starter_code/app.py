@@ -163,8 +163,7 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-    venue_form = VenueForm(request.form)
-    # venue_form = VenueForm()
+    venue_form = VenueForm()
     try:
         name = venue_form.name.data
         city = venue_form.city.data

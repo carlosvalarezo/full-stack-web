@@ -5,3 +5,7 @@ flask-wtf==0.14.3
 flask_sqlalchemy==2.4.4
 psycopg2-binary==2.9.1
 Flask-Migrate==3.0.1
+
+Flask~=2.0.1
+WTForms~=2.3.3
+SQLAlchemy~=1.4.18
