@@ -1,19 +1,19 @@
 version: "3.9"
 services:
   db:
-    image: postgres:9.6-alpine
+    image: postgres:10.18-alpine
     ports:
       - 5432:5432
     volumes:
       - ./data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+#      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - POSTGRES_DB=trivia
       - POSTGRES_USER=trivia
       - POSTGRES_PASSWORD=trivia
     container_name: trivia_db
   db_test:
-    image: postgres:9.6-alpine
+    image: postgres:10.18-alpine
     ports:
       - 5433:5432
     volumes:
@@ -38,13 +38,13 @@ services:
       - DB_USER=trivia
       - DB_PASSWORD=trivia
       - DB_PORT=5432
-      - DB_HOST=db
+      - DB_HOST=trivia_db
       - DB_TEST_NAME=trivia_test
       - DB_TEST_USER=trivia_test
       - DB_TEST_PASSWORD=trivia_test
       - DB_TEST_PORT=5432
       - DB_TEST_HOST=trivia_db_test
-      - PYTHONPATH=${PYTHONPATH}:/backend/flaskr
+      - PYTHONPATH=/backend/flaskr
     depends_on:
       - db
     restart: on-failure:20

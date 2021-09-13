@@ -104,8 +104,8 @@ GET '/api/v1.0/categories'
 ## Testing
 To run the tests, run
 ```
-dropdb trivia_test
-createdb trivia_test
-psql trivia_test < trivia.psql
+PGPASSWORD=${DB_TEST_PASSWORD} dropdb -h trivia_db_test -U trivia_test trivia_test
+PGPASSWORD=${DB_TEST_PASSWORD} createdb -h trivia_db_test -U trivia_test trivia_test
+PGPASSWORD=${DB_TEST_PASSWORD} psql -h trivia_db_test -U trivia_test trivia_test < trivia.psql
 python test_flaskr.py
 ```
