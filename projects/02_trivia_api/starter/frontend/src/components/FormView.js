@@ -11,20 +11,21 @@ class FormView extends Component {
       answer: "",
       difficulty: 1,
       category: 1,
-      categories: {}
+      categories: []
     }
   }
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: 'http://localhost:5000/categories', //TODO: update request URL
       type: "GET",
-      success: (result) => {
-        this.setState({ categories: result.categories })
+      success: result => {
+        console.log("LORENX = ", result.categories)
+        this.setState({ categories: result.categories})
         return;
       },
       error: (error) => {
-        alert('Unable to load categories. Please try your request again')
+        alert('[FORMVIEW - CATEGO]Unable to load categories. Please try your request again')
         return;
       }
     })
@@ -34,7 +35,7 @@ class FormView extends Component {
   submitQuestion = (event) => {
     event.preventDefault();
     $.ajax({
-      url: '/questions', //TODO: update request URL
+      url: 'http://localhost:5000/questions', //TODO: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -48,12 +49,13 @@ class FormView extends Component {
         withCredentials: true
       },
       crossDomain: true,
-      success: (result) => {
+      success: result => {
+        console.log("TEST = ", result)
         document.getElementById("add-question-form").reset();
         return;
       },
       error: (error) => {
-        alert('Unable to add question. Please try your request again')
+        alert('[FORMVIEW - POST QUESTIONS]Unable to add question. Please try your request again')
         return;
       }
     })
@@ -64,6 +66,12 @@ class FormView extends Component {
   }
 
   render() {
+  console.log("LORENX 2= ", this.state.categories)
+  console.log("LORENX 5= ", Object.keys(this.state.categories))
+  Object.keys(this.state.categories).map(id => {
+      console.log("LORENX 3 = ", id)
+      console.log("LORENX 4 = ", this.state.categories[id])
+  })
     return (
       <div id="add-form">
         <h2>Add a New Trivia Question</h2>
@@ -89,9 +97,9 @@ class FormView extends Component {
           <label>
             Category
             <select name="category" onChange={this.handleChange}>
-              {Object.keys(this.state.categories).map(id => {
+              {this.state.categories.map(category => {
                   return (
-                    <option key={id} value={id}>{this.state.categories[id]}</option>
+                    <option key={category.id} value={category.id}>{category.type}</option>
                   )
                 })}
             </select>

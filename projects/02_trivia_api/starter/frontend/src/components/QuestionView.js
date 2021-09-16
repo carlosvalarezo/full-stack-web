@@ -12,7 +12,7 @@ class QuestionView extends Component {
       questions: [],
       page: 1,
       totalQuestions: 0,
-      categories: {},
+      categories: [],
       currentCategory: null,
     }
   }
@@ -23,9 +23,11 @@ class QuestionView extends Component {
 
   getQuestions = () => {
     $.ajax({
-      url: `/questions?page=${this.state.page}`, //TODO: update request URL
+      url: `http://localhost:5000/questions/?page=${this.state.page}`, //TODO: update request URL
       type: "GET",
       success: (result) => {
+//        console.log("PERRO = ", result.categories)
+//        console.log("PERRO 333 = ", result.questions)
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
@@ -58,9 +60,10 @@ class QuestionView extends Component {
     return pageNumbers;
   }
 
+
   getByCategory= (id) => {
     $.ajax({
-      url: `/categories/${id}/questions`, //TODO: update request URL
+      url: `http://localhost:5000/categories/${id}/questions`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({
@@ -76,18 +79,12 @@ class QuestionView extends Component {
     })
   }
 
-  submitSearch = (searchTerm) => {
+  submitSearch = searchTerm => {
     $.ajax({
-      url: `/questions`, //TODO: update request URL
-      type: "POST",
-      dataType: 'json',
-      contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm}),
-      xhrFields: {
-        withCredentials: true
-      },
-      crossDomain: true,
-      success: (result) => {
+      url: `http://localhost:5000/questions/?search_term=${searchTerm}`, //TODO: update request URL
+      type: "GET",
+      success: result => {
+      console.log('RESULTS = ', result)
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
@@ -95,7 +92,7 @@ class QuestionView extends Component {
         return;
       },
       error: (error) => {
-        alert('Unable to load questions. Please try your request again')
+        alert('[RESULTS]Unable to load questions. Please try your request again')
         return;
       }
     })
@@ -105,7 +102,7 @@ class QuestionView extends Component {
     if(action === 'DELETE') {
       if(window.confirm('are you sure you want to delete the question?')) {
         $.ajax({
-          url: `/questions/${id}`, //TODO: update request URL
+          url: `http://localhost:5000/questions/${id}`, //TODO: update request URL
           type: "DELETE",
           success: (result) => {
             this.getQuestions();
@@ -125,10 +122,10 @@ class QuestionView extends Component {
         <div className="categories-list">
           <h2 onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id, ) => (
-              <li key={id} onClick={() => {this.getByCategory(id)}}>
-                {this.state.categories[id]}
-                <img className="category" src={`${this.state.categories[id].toLowerCase()}.svg`}/>
+            {this.state.categories.map(category => (
+              <li key={category.id} onClick={() => {this.getByCategory(category.id)}}>
+                {category.type}
+                <img className="category" src={`${category.type.toLowerCase()}.svg`}/>
               </li>
             ))}
           </ul>
@@ -136,14 +133,14 @@ class QuestionView extends Component {
         </div>
         <div className="questions-list">
           <h2>Questions</h2>
-          {this.state.questions.map((q, ind) => (
+          {this.state.questions.map(question => (
             <Question
-              key={q.id}
-              question={q.question}
-              answer={q.answer}
-              category={this.state.categories[q.category]} 
-              difficulty={q.difficulty}
-              questionAction={this.questionAction(q.id)}
+              key={question.id}
+              question={question.question}
+              answer={question.answer}
+              category={this.state.categories[question.category-1]}
+              difficulty={question.difficulty}
+              questionAction={this.questionAction(question.id)}
             />
           ))}
           <div className="pagination-menu">
