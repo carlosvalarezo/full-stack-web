@@ -109,3 +109,10 @@ PGPASSWORD=${DB_TEST_PASSWORD} createdb -h trivia_db_test -U trivia_test trivia_
 PGPASSWORD=${DB_TEST_PASSWORD} psql -h trivia_db_test -U trivia_test trivia_test < trivia.psql
 python test_flaskr.py
 ```
+
+## Populate the DB
+```
+PGPASSWORD=${DB_PASSWORD} dropdb -h trivia_db -U trivia trivia
+PGPASSWORD=${DB_PASSWORD} createdb -h trivia_db -U trivia trivia
+PGPASSWORD=${DB_PASSWORD} psql -h trivia_db -U trivia trivia < trivia.psql
+```

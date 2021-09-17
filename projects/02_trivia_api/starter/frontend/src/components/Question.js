@@ -14,9 +14,7 @@ class Question extends Component {
   }
 
   render() {
-    console.log('PROPS = ', this.props)
     const { question, answer, category, difficulty } = this.props;
-    console.log(`QUESTION 1111 =${question}, ${answer}, ${category}, ${difficulty}`)
     return (
       <div className="Question-holder">
         <div className="Question">{question}</div>

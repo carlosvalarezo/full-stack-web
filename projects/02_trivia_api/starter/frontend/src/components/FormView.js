@@ -66,12 +66,6 @@ class FormView extends Component {
   }
 
   render() {
-  console.log("LORENX 2= ", this.state.categories)
-  console.log("LORENX 5= ", Object.keys(this.state.categories))
-  Object.keys(this.state.categories).map(id => {
-      console.log("LORENX 3 = ", id)
-      console.log("LORENX 4 = ", this.state.categories[id])
-  })
     return (
       <div id="add-form">
         <h2>Add a New Trivia Question</h2>

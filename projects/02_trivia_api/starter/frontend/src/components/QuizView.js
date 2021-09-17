@@ -3,8 +3,6 @@ import $ from 'jquery';
 
 import '../stylesheets/QuizView.css';
 
-const questionsPerPlay = 5; 
-
 class QuizView extends Component {
   constructor(props){
     super();
@@ -16,7 +14,8 @@ class QuizView extends Component {
         numCorrect: 0,
         currentQuestion: {},
         guess: '',
-        forceEnd: false
+        forceEnd: false,
+        questionsPerPlay: 5
     }
   }
 
@@ -25,7 +24,6 @@ class QuizView extends Component {
       url: 'http://localhost:5000/categories/', //TODO: update request URL
       type: "GET",
       success: (result) => {
-      console.log("AMIGO = ", result)
         this.setState({ categories: result.categories })
         return;
       },
@@ -45,29 +43,23 @@ class QuizView extends Component {
   }
 
   getNextQuestion = () => {
-    const previousQuestions = [...this.state.previousQuestions]
-    if(this.state.currentQuestion.id) { previousQuestions.push(this.state.currentQuestion.id) }
-
+    const previousQuestions = [...this.state.previousQuestions];
+    const currentQuestionId = this.state.currentQuestion.id;
+    const quizCategoryId = this.state.quizCategory.id;
+    if (currentQuestionId) {
+       previousQuestions.push(currentQuestionId)
+    }
     $.ajax({
-      url: 'http://localhost:5000/questions/play/', //TODO: update request URL
-      type: "POST",
-      dataType: 'json',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        previous_questions: previousQuestions,
-        quiz_category: this.state.quizCategory
-      }),
-      xhrFields: {
-        withCredentials: true
-      },
-      crossDomain: true,
+      url: `http://localhost:5000/questions/play/?quiz_category=${quizCategoryId}&previous_questions=${previousQuestions}`, //TODO: update request URL
+      type: "GET",
       success: (result) => {
         this.setState({
           showAnswer: false,
           previousQuestions: previousQuestions,
-          currentQuestion: result.question,
+          currentQuestion: result,
           guess: '',
-          forceEnd: result.question ? false : true
+          forceEnd: result ? false : true,
+          questionsPerPlay: result.number_of_questions
         })
         return;
       },
@@ -96,12 +88,12 @@ class QuizView extends Component {
       numCorrect: 0,
       currentQuestion: {},
       guess: '',
-      forceEnd: false
+      forceEnd: false,
+      questionsPerPlay: 5
     })
   }
 
   renderPrePlay(){
-  console.log('this.state.categories =', this.state.categories)
       return (
           <div className="quiz-play-holder">
               <div className="choose-header">Choose Category</div>
@@ -152,7 +144,8 @@ class QuizView extends Component {
   }
 
   renderPlay(){
-    return this.state.previousQuestions.length === questionsPerPlay || this.state.forceEnd
+  const qpp = this.state.questionsPerPlay > 5 ? 5 : this.state.questionsPerPlay;
+    return this.state.previousQuestions.length === qpp || this.state.forceEnd
       ? this.renderFinalScore()
       : this.state.showAnswer 
         ? this.renderCorrectAnswer()

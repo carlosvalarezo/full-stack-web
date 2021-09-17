@@ -36,8 +36,6 @@ def create_app(test_config=None):
     def get_categories():
         categories_data = db.session.query(Category)
         formatted_categories = [category.format() for category in categories_data]
-        logging.basicConfig(level=logging.DEBUG)
-        logging.info(f"MY_CATEGOS S= {formatted_categories}")
         return jsonify({
             'success': True,
             'categories': formatted_categories
@@ -140,23 +138,27 @@ def create_app(test_config=None):
     @app.route('/questions/play/', methods=['GET'])
     def play():
         question = ""
+        category_id = 0
+        answer = ""
+        id = 0
         try:
-            if 'quiz_category' not in request.args:
-                seed(1)
-                total_categories = db.session.query(Category).all()
-                category_id = randint(1, len(total_categories) - 1)
             if 'quiz_category' in request.args:
-                category_id = request.args.get('category')
+                category_id = request.args.get('quiz_category')
+            if 'previous_questions' in request.args:
+                previous_questions = request.args.get('previous_questions')
             questions_in_category = Question.query.filter(Question.category == category_id).all()
             for question_in_category in questions_in_category:
-                if 'previous_questions' in request.args:
-                    previous_questions = request.args.get('previous_questions')
-                    if question_in_category.id not in set(previous_questions):
-                        question = question_in_category.question
-                        break
+                if str(question_in_category.id) not in previous_questions.split(','):
+                    question = question_in_category.question
+                    answer = question_in_category.answer
+                    id = question_in_category.id
+                    break
             return jsonify({
                 'success': True,
-                'question': question
+                'question': question,
+                'number_of_questions': len(questions_in_category),
+                'answer': answer,
+                'id': id
             })
         except Exception as e:
             print(e)

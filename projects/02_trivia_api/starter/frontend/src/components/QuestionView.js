@@ -26,8 +26,6 @@ class QuestionView extends Component {
       url: `http://localhost:5000/questions/?page=${this.state.page}`, //TODO: update request URL
       type: "GET",
       success: (result) => {
-//        console.log("PERRO = ", result.categories)
-//        console.log("PERRO 333 = ", result.questions)
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
@@ -100,9 +98,9 @@ class QuestionView extends Component {
 
   questionAction = (id) => (action) => {
     if(action === 'DELETE') {
-      if(window.confirm('are you sure you want to delete the question?')) {
+      if(window.confirm('[CONFIRM] Are you sure you want to delete the question?')) {
         $.ajax({
-          url: `http://localhost:5000/questions/${id}`, //TODO: update request URL
+          url: `http://localhost:5000/questions/${id}/`, //TODO: update request URL
           type: "DELETE",
           success: (result) => {
             this.getQuestions();
