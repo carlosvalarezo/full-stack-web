@@ -1,0 +1,2 @@
+FROM postgres:10.18-alpine
+ADD ./db_script/ /docker-entrypoint-initdb.d/

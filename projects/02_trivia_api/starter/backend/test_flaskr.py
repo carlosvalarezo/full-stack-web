@@ -55,18 +55,26 @@ class CategoryTestCase(unittest.TestCase):
             self.db.create_all()
 
     def test_get_paginated_questions(self):
-        res = self.client().get('/questions/?page=1')
+        res = self.client().get('/questions/list/?page=1')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+
+    def test_fails_without_parameter_page_paginated_questions(self):
+        res = self.client().get('/questions/list/')
+        self.assertEqual(res.status_code, 422)
 
     def test_delete_particular_question(self):
-        res = self.client().delete('/questions/11')
+        res = self.client().delete('/questions/1/')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+
+    def test_receives_error_on_delete_question_without_id(self):
+        res = self.client().delete('/questions/')
+        self.assertEqual(res.status_code, 404)
 
     def test_create_particular_question(self):
         res = self.client().post('/questions', json={'question': 'my-question',
@@ -78,12 +86,21 @@ class CategoryTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
 
+    def test_fails_on_creating_a_question_on_missing_parameters(self):
+        res = self.client().post('/questions', json={})
+        self.assertEqual(res.status_code, 422)
+
     def test_search_question_given_parameter(self):
-        res = self.client().get('/questions/?search_term=nks')
+        res = self.client().get('/questions/search/?search_term=nks')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+
+    def test_fails_search_question_without_search_term(self):
+        res = self.client().get('/questions/search/')
+
+        self.assertEqual(res.status_code, 422)
 
     def test_get_question_by_category(self):
         res = self.client().get('/categories/1/questions')
@@ -93,7 +110,7 @@ class CategoryTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
 
     def test_play_given_category_id(self):
-        res = self.client().get('/questions/play/?category=1&previous_questions=1,2,3')
+        res = self.client().get('/questions/play/?quiz_category=1&previous_questions=1,2,3')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -101,12 +118,13 @@ class CategoryTestCase(unittest.TestCase):
 
     def test_play_without_category_id(self):
         res = self.client().get('/questions/play/?previous_questions=1,2,3')
-        data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
+        self.assertEqual(res.status_code, 422)
 
+    def test_play_without_previous_questions(self):
+        res = self.client().get('/questions/play/?quiz_category=1')
 
+        self.assertEqual(res.status_code, 422)
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()

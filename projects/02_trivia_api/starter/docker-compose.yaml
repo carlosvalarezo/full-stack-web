@@ -1,7 +1,10 @@
 version: "3.9"
 services:
   db:
-    image: postgres:10.18-alpine
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.db
+    image: carlosvalarezo/trivia_db
     ports:
       - 5432:5432
     volumes:
@@ -12,7 +15,10 @@ services:
       - POSTGRES_PASSWORD=trivia
     container_name: trivia_db
   db_test:
-    image: postgres:10.18-alpine
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.db.test
+    image: carlosvalarezo/trivia_db_test
     ports:
       - 5433:5432
     volumes:

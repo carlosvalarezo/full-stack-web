@@ -57,7 +57,7 @@ def create_app(test_config=None):
                 'current_category': page
             })
         except Exception as e:
-            print(e)
+            logging.error(f"ERROR = {e}")
             abort(422)
 
     @app.route('/questions/<int:id>/', methods=['DELETE'])
@@ -70,19 +70,26 @@ def create_app(test_config=None):
                 'success': True
             })
         except Exception as e:
-            print(e)
-            return jsonify({
-                'success': False
-            })
+            logging.error(f"ERROR = {e}")
+            abort(405)
+
+    def is_empty(attribute):
+        if attribute is None:
+            raise Exception
 
     @app.route('/questions', methods=['POST'])
     def post_question():
         body = request.get_json()
         try:
-            question = body.get('question', '')
-            answer = body.get('answer', '')
+            question = body.get('question')
+            answer = body.get('answer')
             category = body.get('category')
             difficulty = body.get('difficulty')
+
+            is_empty(question)
+            is_empty(answer)
+            is_empty(category)
+            is_empty(difficulty)
 
             question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
             question.insert()
@@ -100,7 +107,7 @@ def create_app(test_config=None):
             print(e)
             abort(422)
 
-    @app.route('/questions/', methods=['GET'])
+    @app.route('/questions/search/', methods=['GET'])
     def search_question():
         try:
             if 'search_term' in request.args:
@@ -111,10 +118,20 @@ def create_app(test_config=None):
                     'success': True,
                     'questions': formatted_questions,
                 })
+            if 'search_term' not in request.args:
+                raise Exception
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    @app.route('/questions/list/', methods=['GET'])
+    def get_questions_list():
+        try:
             if 'page' in request.args:
                 page = request.args.get('page')
                 return get_questions(int(page))
-
+            if 'page' not in request.args:
+                raise Exception
         except Exception as e:
             print(e)
             abort(422)
@@ -142,6 +159,10 @@ def create_app(test_config=None):
         answer = ""
         id = 0
         try:
+            if 'quiz_category' not in request.args:
+                raise Exception
+            if 'previous_questions' not in request.args:
+                raise Exception
             if 'quiz_category' in request.args:
                 category_id = request.args.get('quiz_category')
             if 'previous_questions' in request.args:
@@ -170,7 +191,16 @@ def create_app(test_config=None):
             'success': False,
             'error': 404,
             'message': f'resource not found: {error}'
-        }), 404
+        }), 404\
+
+
+    @app.errorhandler(405)
+    def not_allowed(error):
+        return jsonify({
+            'success': False,
+            'error': 405,
+            'message': f'method not allowed: {error}'
+        }), 405
 
     @app.errorhandler(422)
     def unable_to_process(error):

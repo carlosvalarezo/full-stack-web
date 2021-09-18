@@ -23,7 +23,7 @@ class QuestionView extends Component {
 
   getQuestions = () => {
     $.ajax({
-      url: `http://localhost:5000/questions/?page=${this.state.page}`, //TODO: update request URL
+      url: `http://localhost:5000/questions/list/?page=${this.state.page}`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({
@@ -79,7 +79,7 @@ class QuestionView extends Component {
 
   submitSearch = searchTerm => {
     $.ajax({
-      url: `http://localhost:5000/questions/?search_term=${searchTerm}`, //TODO: update request URL
+      url: `http://localhost:5000/questions/search/?search_term=${searchTerm}`, //TODO: update request URL
       type: "GET",
       success: result => {
       console.log('RESULTS = ', result)
