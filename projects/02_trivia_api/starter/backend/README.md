@@ -12,13 +12,13 @@ The script above will install the dependencies setup env vars, secrets.
 
 Once executed go to http://localhost:3000 and start playing
 
-###Running test
+### Running test
 ```shell
 sh test.sh
 ```
 Once inside the container execute `python test_flaskr.py`. The database for testing is already up and running.
 
-###List of endpoints
+### List of endpoints
 
 ```
 GET '/categories'
