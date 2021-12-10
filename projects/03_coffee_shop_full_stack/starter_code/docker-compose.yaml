@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    image: carlosvalarezo/coffee_shop_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=api
+      - FLASK_ENV=development
+      - PORT=5000
+    volumes:
+      - ./backend:/backend
+    container_name: coffee_shop_backend
+#  frontend:
+#    build:
+#      context: frontend
+#      dockerfile: Dockerfile
+#    image: carlosvalarezo/trivia_frontend
+#    ports:
+#      - 3000:3000
+#    depends_on:
+#      - backend
+#    restart: on-failure:30
+#    volumes:
+#      - ./frontend:/frontend
+#      - /frontend/node_modules
+#    container_name: trivia_frontend
