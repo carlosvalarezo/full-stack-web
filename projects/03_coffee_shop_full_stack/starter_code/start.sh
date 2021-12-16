@@ -1,3 +1,4 @@
 #!/bin/bash
 
-docker-compose up --build -d
+sh ./backend/start.sh
+docker-compose up

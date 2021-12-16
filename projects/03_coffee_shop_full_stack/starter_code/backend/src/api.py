@@ -3,6 +3,10 @@ from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
 import json
 from flask_cors import CORS
+from pathlib import Path
+import http.client
+import ssl
+import base64
 import logging
 
 from database.models import db, setup_db, db_drop_and_create_all, Drink
@@ -12,49 +16,40 @@ import auth.auth as auth
 
 logging.basicConfig(level=logging.DEBUG)
 
+app = Flask(__name__)
+setup_db(app)
+db_drop_and_create_all()
 
-def create_app(test_config=None):
-    # create and configure the app
-    app = Flask(__name__)
-    setup_db(app)
-    db_drop_and_create_all()
+CORS(app, resources={r"/*": {"origins": '*'}})
 
-    CORS(app, resources={r"/*": {"origins": '*'}})
 
-    # @app.after_request
-    # def after_request(response):
-    #     response.headers.add('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept,true')
-    #     response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
-    #     response.headers.add('Access-Control-Allow-Credentials', 'true')
-    #     return response
+@app.errorhandler(422)
+def unprocessable(error):
+    return jsonify({
+        "success": False,
+        "error": 422,
+        "message": f"unprocessable {error}"
+    }), 422
 
-    @app.errorhandler(422)
-    def unprocessable(error):
-        return jsonify({
-            "success": False,
-            "error": 422,
-            "message": f"unprocessable {error}"
-        }), 422
 
-    @app.route('/health')
-    def hello():
-        return jsonify({'status': 'up'})
+@app.route('/health')
+def hello():
+    return jsonify({'status': 'up'})
 
-    @app.route('/drinks')
-    def get_drinks():
-        try:
-            drinks_data = db.session.query(Drink)
-            drinks = [drink.short() for drink in drinks_data]
-            if drinks:
-                return jsonify({
-                    'success': True,
-                    'categories': drinks
-                })
-        except Exception as e:
-            print(e)
-            abort(422)
 
-    return app
+@app.route('/drinks')
+def get_drinks():
+    try:
+        drinks_data = db.session.query(Drink)
+        drinks = [drink.short() for drink in drinks_data]
+        if drinks:
+            return jsonify({
+                'success': True,
+                'categories': drinks
+            })
+    except Exception as e:
+        print(e)
+        abort(422)
 
 
 '''
@@ -143,6 +138,16 @@ Example error handling for unprocessable entity
     error handler should conform to general task above
 '''
 
+# if __name__ == '__main__':
+#     port = int(os.environ.get('PORT', 5000))
+#     create_app().run(host='0.0.0.0', port=port)
+
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    create_app().run(host='0.0.0.0', port=port)
+    # certs_dir = Path('certs')
+    certs_dir = os.path.abspath(os.getcwd())
+    print(f"CERTS_DIR = {certs_dir}")
+    port = int(os.getenv('APP_PORT', 443))
+    app.secret_key = os.urandom(24)
+    ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+    ctx.load_cert_chain(f'{certs_dir}/src/certs/localhost.crt', f'{certs_dir}/src/certs/localhost.key')
+    app.run(debug=True, host='0.0.0.0', port=port, ssl_context=ctx)

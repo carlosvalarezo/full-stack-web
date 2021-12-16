@@ -18,4 +18,3 @@ USER pythonuser
 RUN python -m pip install -r requirements.txt
 
 ENTRYPOINT ["python", "src/api.py", "-h", "0.0.0.0"]
-#ENTRYPOINT ["python", "-m", "flask", "run", "--reload"]
