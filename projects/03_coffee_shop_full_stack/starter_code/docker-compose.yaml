@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     image: carlosvalarezo/coffee_shop_backend
     ports:
-      - "443:443"
+      - "10443:10443"
     environment:
       - FLASK_APP=api
       - FLASK_ENV=development
@@ -14,17 +14,16 @@ services:
     volumes:
       - ./backend:/backend
     container_name: coffee_shop_backend
-#  frontend:
-#    build:
-#      context: frontend
-#      dockerfile: Dockerfile
-#    image: carlosvalarezo/trivia_frontend
-#    ports:
-#      - 3000:3000
-#    depends_on:
-#      - backend
-#    restart: on-failure:30
-#    volumes:
-#      - ./frontend:/frontend
-#      - /frontend/node_modules
-#    container_name: trivia_frontend
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    image: carlosvalarezo/coffee_shop_frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/frontend/
+      - /frontend/node_modules
+    container_name: coffee_shop_frontend

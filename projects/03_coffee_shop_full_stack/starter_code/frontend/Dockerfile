@@ -1,17 +1,11 @@
-FROM node:16.0.0-buster-slim
-
-RUN apt update -y && apt upgrade -y
-RUN useradd --user-group --system --create-home --no-log-init nodeuser
-
+FROM node:12.20.1-alpine
+RUN apk update && apk upgrade
+RUN apk add curl
+RUN addgroup -S nodeuser && adduser -S nodeuser -G nodeuser
 WORKDIR /frontend
-
-COPY package.json .
-
+COPY . .
 RUN chown -R nodeuser:nodeuser /frontend
 RUN chmod 755 /frontend
-
 USER nodeuser
-
 RUN npm install
-
 ENTRYPOINT ["npm", "start"]
