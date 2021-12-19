@@ -52,6 +52,21 @@ def get_drinks():
         abort(422)
 
 
+@app.route('/drinks-detail')
+@auth.requires_authorization_with_permissions('get:drinks-detail')
+def get_drinks_detail():
+    try:
+        drinks_data = db.session.query(Drink)
+        drinks = [drink.long() for drink in drinks_data]
+        if drinks:
+            return jsonify({
+                'success': True,
+                'categories': drinks
+            })
+    except Exception as e:
+        print(e)
+        abort(422)
+
 '''
 @TODO uncomment the following line to initialize the datbase
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
@@ -61,14 +76,6 @@ def get_drinks():
 # db_drop_and_create_all()
 
 # ROUTES
-'''
-@TODO implement endpoint
-    GET /drinks
-        it should be a public endpoint
-        it should contain only the drink.short() data representation
-    returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
-        or appropriate status code indicating reason for failure
-'''
 
 '''
 @TODO implement endpoint
@@ -138,15 +145,11 @@ Example error handling for unprocessable entity
     error handler should conform to general task above
 '''
 
-# if __name__ == '__main__':
-#     port = int(os.environ.get('PORT', 5000))
-#     create_app().run(host='0.0.0.0', port=port)
-
 if __name__ == '__main__':
     # certs_dir = Path('certs')
     certs_dir = os.path.abspath(os.getcwd())
     print(f"CERTS_DIR = {certs_dir}")
-    port = int(os.getenv('APP_PORT', 443))
+    port = int(os.getenv('APP_PORT', 10443))
     app.secret_key = os.urandom(24)
     ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
     ctx.load_cert_chain(f'{certs_dir}/src/certs/localhost.crt', f'{certs_dir}/src/certs/localhost.key')
