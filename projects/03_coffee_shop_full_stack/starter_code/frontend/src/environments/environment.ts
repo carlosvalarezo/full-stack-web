@@ -4,11 +4,11 @@
 
 export const environment = {
   production: false,
-  apiServerUrl: 'http://127.0.0.1:5000', // the running FLASK api server url
+  apiServerUrl: 'https://127.0.0.1:10443', // the running FLASK api server url
   auth0: {
-    url: '', // the auth0 domain prefix
-    audience: '', // the audience set for the auth0 app
-    clientId: '', // the client id generated for the auth0 app
-    callbackURL: 'https://localhost:4200', // the base url of the running ionic application.
+    url: 'dev-2ntz9src', // the auth0 domain prefix
+    audience: 'drinks-api', // the audience set for the auth0 app
+    clientId: 'K9HellnWmJ4FMnVBfziWUVGUjzpdFmpz', // the client id generated for the auth0 app
+    callbackURL: 'https://127.0.0.1:4200', // the base url of the running ionic application.,
   }
 };

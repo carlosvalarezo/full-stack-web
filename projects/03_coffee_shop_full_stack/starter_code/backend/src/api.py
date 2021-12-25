@@ -10,8 +10,6 @@ import base64
 import logging
 
 from database.models import db, setup_db, db_drop_and_create_all, Drink
-# import database.models as db
-# from .auth.auth import AuthError, requires_auth
 import auth.auth as auth
 
 logging.basicConfig(level=logging.DEBUG)
@@ -45,8 +43,30 @@ def get_drinks():
         if drinks:
             return jsonify({
                 'success': True,
-                'categories': drinks
+                'drinks': drinks
             })
+    except Exception as e:
+        print(e)
+        abort(422)
+
+
+@app.route('/drinks', methods=['POST'])
+def post_drinks():
+    body = request.get_json()
+    try:
+        title = body.get('title')
+        recipe = body.get('recipe')
+        drink = Drink(title=title, recipe=json.dumps(recipe))
+        drink.insert()
+
+        current_drinks = Drink.query.order_by(Drink.title).all()
+        drinks = [question.short() for question in current_drinks]
+
+        return jsonify({
+            'success': True,
+            'drinks': drinks
+        })
+
     except Exception as e:
         print(e)
         abort(422)
@@ -54,37 +74,18 @@ def get_drinks():
 
 @app.route('/drinks-detail')
 @auth.requires_authorization_with_permissions('get:drinks-detail')
-def get_drinks_detail():
+def get_drinks_detail(jwt):
     try:
         drinks_data = db.session.query(Drink)
         drinks = [drink.long() for drink in drinks_data]
         if drinks:
             return jsonify({
                 'success': True,
-                'categories': drinks
+                'drinks': drinks
             })
     except Exception as e:
         print(e)
         abort(422)
-
-'''
-@TODO uncomment the following line to initialize the datbase
-!! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
-!! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
-!! Running this funciton will add one
-'''
-# db_drop_and_create_all()
-
-# ROUTES
-
-'''
-@TODO implement endpoint
-    GET /drinks-detail
-        it should require the 'get:drinks-detail' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
-        or appropriate status code indicating reason for failure
-'''
 
 '''
 @TODO implement endpoint
@@ -146,9 +147,7 @@ Example error handling for unprocessable entity
 '''
 
 if __name__ == '__main__':
-    # certs_dir = Path('certs')
     certs_dir = os.path.abspath(os.getcwd())
-    print(f"CERTS_DIR = {certs_dir}")
     port = int(os.getenv('APP_PORT', 10443))
     app.secret_key = os.urandom(24)
     ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)

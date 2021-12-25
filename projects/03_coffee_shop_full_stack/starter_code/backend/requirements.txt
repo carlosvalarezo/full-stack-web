@@ -20,3 +20,4 @@ Werkzeug==0.15.5
 wrapt==1.11.1
 Flask-Cors==3.0.8
 authlib
+python-dotenv

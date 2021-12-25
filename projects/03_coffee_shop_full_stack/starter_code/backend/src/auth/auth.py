@@ -54,9 +54,8 @@ def check_permission(permission, payload):
 
 def verify_decode_jwt(token):
     # GET THE PUBLIC KEY FROM AUTH0 FROM MY AUTH0 ACCOUNT
-    jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
+    jsonurl = urlopen(f'https://{AUTH0_DOMAIN}.auth0.com/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
-
     # GET THE DATA IN THE HEADER
     unverified_header = jwt.get_unverified_header(token)
 
@@ -67,7 +66,6 @@ def verify_decode_jwt(token):
             'code': 'invalid_header',
             'description': 'Authorization malformed.'
         }, 401)
-
     for key in jwks['keys']:
         if key['kid'] == unverified_header['kid']:
             rsa_key = {
@@ -86,9 +84,8 @@ def verify_decode_jwt(token):
                     rsa_key,
                     algorithms=ALGORITHMS,
                     audience=API_AUDIENCE,
-                    issuer='https://' + AUTH0_DOMAIN + '/'
+                    issuer=f'https://{AUTH0_DOMAIN}.auth0.com/'
                 )
-
                 return payload
 
             except jwt.ExpiredSignatureError:
@@ -120,10 +117,9 @@ def requires_authorization_with_permissions(permission=''):
             try:
                 jwt = get_token_auth_header()
                 payload = verify_decode_jwt(jwt)
-                check_permission(permission, payload)
             except Exception as e:
                 abort(403)
-
+            check_permission(permission, payload)
             return f(payload, *args, **kwargs)
 
         return wrapper
