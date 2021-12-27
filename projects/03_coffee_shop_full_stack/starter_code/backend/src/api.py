@@ -73,6 +73,22 @@ def post_drinks(jwt):
         abort(422)
 
 
+@app.route('/drinks-detail')
+@auth.requires_authorization_with_permissions('get:drinks-detail')
+def get_drinks_detail(jwt):
+    try:
+        drinks_data = db.session.query(Drink)
+        drinks = [drink.long() for drink in drinks_data]
+        if drinks:
+            return jsonify({
+                'success': True,
+                'drinks': drinks
+            })
+    except Exception as e:
+        print(e)
+        abort(422)
+
+
 @app.route('/drinks/<int:drink_id>', methods=['PATCH'])
 @auth.requires_authorization_with_permissions('patch:drinks')
 def patch_drinks(jwt, drink_id):
@@ -94,17 +110,18 @@ def patch_drinks(jwt, drink_id):
         abort(422)
 
 
-@app.route('/drinks-detail')
-@auth.requires_authorization_with_permissions('get:drinks-detail')
-def get_drinks_detail(jwt):
+@app.route('/drinks/<int:drink_id>', methods=['DELETE'])
+@auth.requires_authorization_with_permissions('delete:drinks')
+def delete_drinks(jwt, drink_id):
     try:
-        drinks_data = db.session.query(Drink)
-        drinks = [drink.long() for drink in drinks_data]
-        if drinks:
-            return jsonify({
-                'success': True,
-                'drinks': drinks
-            })
+        Drink.query.filter(Drink.id == drink_id).delete()
+        db.session.commit()
+        current_drinks = Drink.query.order_by(Drink.title).all()
+        drinks = [question.short() for question in current_drinks]
+        return jsonify({
+            'success': True,
+            'drinks': drinks
+        })
     except Exception as e:
         print(e)
         abort(422)
