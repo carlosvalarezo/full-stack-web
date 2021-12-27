@@ -353,7 +353,7 @@
 				"bearer": [
 					{
 						"key": "token",
-						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik4wTkNOVEEzTWpaQ1FUa3lRMEl6TmtORk0wWXhRVFUwT1RFMFFVVkNSRUpDT1RBME1EUXpOUSJ9.eyJpc3MiOiJodHRwczovL3VkYWNpdHktZnNuZC5hdXRoMC5jb20vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMDY3MTQ4MTQ0MTcwNjk3MTI4OTMiLCJhdWQiOlsiZGV2IiwiaHR0cHM6Ly91ZGFjaXR5LWZzbmQuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTU2MDg5MDE2MCwiZXhwIjoxNTYwODk3MzYwLCJhenAiOiJPSjVwQk9ZSURFa09FVFVmUWo1ajdsSDZFTFcwMkd1MCIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJwZXJtaXNzaW9ucyI6WyJnZXQ6ZHJpbmtzIiwiZ2V0OmRyaW5rcy1kZXRhaWwiXX0.j9ocW47_exQOkEa10ffh8eijGvrIMxnGRzCmbrXnfaN_8ULsgA7AnWYMtvP8RmPWvT9n8sReWnFuJajUHBUbnBO2GuJ4aM3-WDUBeJT0X_mpGUWs4lxaNTbIkWdiWPTsEiRnP3wT-dU_v3Olw2PB4UMajMIjSH-IdF2Y1CiJIOaM0gV44RGZRyRvj6C2_mOkMfoXxzw-HrVvTRCo1NcUPea5Bs04POni7azx-B7FstP_HLm0dEbbge4XbmovHwlIXknIoI8PbuGXeLBqE2hv8fErKFBuIykxzK0nErH5zSPCrkM-_9smb8TLGAH-E5j1KQb6SHDKtcV_QHnsUYFuXA",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik56aERSamt5UkRWRlJVVXhRa0kwTmtJMFJqUkNNVE0zTlVZd05FSXlPVU0yTnpORFFUVTVOUSJ9.eyJpc3MiOiJodHRwczovL2Rldi0ybnR6OXNyYy5hdXRoMC5jb20vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMDU3NDY4OTM3MzkyMzQ1ODg3NTUiLCJhdWQiOiJkcmlua3MtYXBpIiwiaWF0IjoxNjQwNjE0Nzk4LCJleHAiOjE2NDA2MjE5OTgsImF6cCI6Iks5SGVsbG5XbUo0Rk1uVkJmemlXVVZHVWp6cGRGbXB6Iiwic2NvcGUiOiIiLCJwZXJtaXNzaW9ucyI6WyJnZXQ6ZHJpbmtzLWRldGFpbCJdfQ.sBJLIoVrjyfED5HOqLqHmkcir42URGofvhfkkUY7EDxYiNmlzGA4DR9hhyV_bIeZkyaFA1mAwm9KkG5QzBXCXWm5fORr6BIxw741WslOOVIMHO18mmq8tJbBTNOLLfKk9m7czaOW3kJr0kzNKzGrqZ6wkiieTa-mFlCqJq_rQjfqTQETjclJcNzBF-DBGXKrXMhS0v9jlLK8cq0dwtEtRYDaMg1zjzsI_IJ1Be1XL2Gqv_KoSTeB81KJByA08WP77NSgotlHT1wOcui9Grj0__wAFME4Vx5reivBqaTwqw_PpfJqjBTIeuLC1ftbeTLX2coQPtIGAvVT9EkRnszJyQ",
 						"type": "string"
 					}
 				]
@@ -531,7 +531,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Water5\"\n}"
+							"raw": "{\n    \"title\": \"Water5\",\n    \"recipe\": {\n        \"name\": \"Water\",\n        \"color\": \"magenta\",\n        \"parts\": 1\n    }\n}"
 						},
 						"url": {
 							"raw": "{{host}}/drinks/1",
@@ -584,7 +584,7 @@
 				"bearer": [
 					{
 						"key": "token",
-						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik4wTkNOVEEzTWpaQ1FUa3lRMEl6TmtORk0wWXhRVFUwT1RFMFFVVkNSRUpDT1RBME1EUXpOUSJ9.eyJpc3MiOiJodHRwczovL3VkYWNpdHktZnNuZC5hdXRoMC5jb20vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMDY3MTQ4MTQ0MTcwNjk3MTI4OTMiLCJhdWQiOlsiZGV2IiwiaHR0cHM6Ly91ZGFjaXR5LWZzbmQuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTU2MDg4OTU5NiwiZXhwIjoxNTYwODk2Nzk2LCJhenAiOiJPSjVwQk9ZSURFa09FVFVmUWo1ajdsSDZFTFcwMkd1MCIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJwZXJtaXNzaW9ucyI6WyJkZWxldGU6ZHJpbmtzIiwiZ2V0OmRyaW5rcyIsImdldDpkcmlua3MtZGV0YWlsIiwicGF0Y2g6ZHJpbmtzIiwicG9zdDpkcmlua3MiXX0.Qk-5FC2X_RUkK00WKARYCKw_877XFuaT5ND3f3ObD9Ly1e1GMfJXhi3McV12binGGCw6x241erIjGB0t8WbWdU3bYpIVD1klZ64DVLQ8Q2LQ2NzB3eFEOgGLL85az1jIDbRiuATIRbbBOWILPJ6h6KR9L5hExklf2zuj3Bnwm7zMRmVpIJmjrUt4bWjtTOguOwJ0IVQsk4PDjGxzwfrUWFCFNDqN_u15JNLxeH21C-QvCpHs3D4Aodeh1qFUuWHfK_Gyfu91AitXPTVZRX9eZbUOVkGT3JMn4sKn9oGaKFTx2E-Y4DmoECG0uWImbX_wiRjx4aTeo7Q7hKSReMToPA",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik56aERSamt5UkRWRlJVVXhRa0kwTmtJMFJqUkNNVE0zTlVZd05FSXlPVU0yTnpORFFUVTVOUSJ9.eyJpc3MiOiJodHRwczovL2Rldi0ybnR6OXNyYy5hdXRoMC5jb20vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMDU3NDY4OTM3MzkyMzQ1ODg3NTUiLCJhdWQiOiJkcmlua3MtYXBpIiwiaWF0IjoxNjQwNjE0OTA3LCJleHAiOjE2NDA2MjIxMDcsImF6cCI6Iks5SGVsbG5XbUo0Rk1uVkJmemlXVVZHVWp6cGRGbXB6Iiwic2NvcGUiOiIiLCJwZXJtaXNzaW9ucyI6WyJkZWxldGU6ZHJpbmtzIiwiZ2V0OmRyaW5rcy1kZXRhaWwiLCJwYXRjaDpkcmlua3MiLCJwb3N0OmRyaW5rcyJdfQ.rVQKX4p9Qv4MKILJPMrSMjeUOHDPhh9obR1FC2HQ9tB5BIvP9qWInOp6PVp-S_D1SodN0oD1O3AsIbygxS_52sYli0GS66L3FNrEXgQNW55YG9OFJHyml6WRm_QFDBwmKi_twCDgL30yZgrLozpeesuCsY3SXePQrtODZLYqZH8ilTVCQyzuM679pCDqs_GzT5WdEZhCXVp4liUlWr_tbK6A8WpYibBZGTfZsxqVkZJQ6mMzvUn-XJwcptNH6rnwmxQdl6gEMbQhP3jHRMy5Phw7fpQaBmiWuivaaFM1ht1QQBs8e5GPgIYeIiJ7NRt4FhkCQnFVvKoNuBOO3-QI2g",
 						"type": "string"
 					}
 				]
@@ -639,7 +639,7 @@
 		{
 			"id": "7da0fa13-ecd9-4d7d-8e38-fde2c81cfdaf",
 			"key": "host",
-			"value": "localhost:5000",
+			"value": "https://localhost:10443",
 			"type": "string"
 		}
 	]

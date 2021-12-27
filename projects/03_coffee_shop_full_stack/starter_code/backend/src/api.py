@@ -26,8 +26,17 @@ def unprocessable(error):
     return jsonify({
         "success": False,
         "error": 422,
-        "message": f"unprocessable {error}"
+        "message": f"unprocesssable {error}"
     }), 422
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": f"NOT FOUND = {error}"
+    }), 404
 
 
 @app.route('/health')
@@ -35,16 +44,17 @@ def hello():
     return jsonify({'status': 'up'})
 
 
-@app.route('/drinks')
+@app.route('/drinks', methods=['GET'])
 def get_drinks():
     try:
         drinks_data = db.session.query(Drink)
         drinks = [drink.short() for drink in drinks_data]
-        if drinks:
-            return jsonify({
-                'success': True,
-                'drinks': drinks
-            })
+        if not drinks:
+            drinks = []
+        return jsonify({
+            'success': True,
+            'drinks': drinks
+        })
     except Exception as e:
         print(e)
         abort(422)
@@ -78,12 +88,13 @@ def post_drinks(jwt):
 def get_drinks_detail(jwt):
     try:
         drinks_data = db.session.query(Drink)
+        if not drinks_data:
+            abort(404)
         drinks = [drink.long() for drink in drinks_data]
-        if drinks:
-            return jsonify({
-                'success': True,
-                'drinks': drinks
-            })
+        return jsonify({
+            'success': True,
+            'drinks': drinks
+        })
     except Exception as e:
         print(e)
         abort(422)
@@ -95,7 +106,11 @@ def patch_drinks(jwt, drink_id):
     body = request.get_json()
     try:
         drink = db.session.query(Drink).filter(Drink.id == drink_id).first()
+        if not body.get('title'):
+            abort(404)
         drink.title = body.get('title')
+        if not body.get('recipe'):
+            abort(404)
         drink.recipe = json.dumps(body.get('recipe'))
         drink.update()
         current_drinks = Drink.query.order_by(Drink.title).all()
@@ -104,7 +119,6 @@ def patch_drinks(jwt, drink_id):
             'success': True,
             'drinks': drinks
         })
-
     except Exception as e:
         print(e)
         abort(422)
