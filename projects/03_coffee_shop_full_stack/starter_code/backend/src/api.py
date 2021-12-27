@@ -51,7 +51,8 @@ def get_drinks():
 
 
 @app.route('/drinks', methods=['POST'])
-def post_drinks():
+@auth.requires_authorization_with_permissions('post:drinks')
+def post_drinks(jwt):
     body = request.get_json()
     try:
         title = body.get('title')
@@ -62,6 +63,27 @@ def post_drinks():
         current_drinks = Drink.query.order_by(Drink.title).all()
         drinks = [question.short() for question in current_drinks]
 
+        return jsonify({
+            'success': True,
+            'drinks': drinks
+        })
+
+    except Exception as e:
+        print(e)
+        abort(422)
+
+
+@app.route('/drinks/<int:drink_id>', methods=['PATCH'])
+@auth.requires_authorization_with_permissions('patch:drinks')
+def patch_drinks(jwt, drink_id):
+    body = request.get_json()
+    try:
+        drink = db.session.query(Drink).filter(Drink.id == drink_id).first()
+        drink.title = body.get('title')
+        drink.recipe = json.dumps(body.get('recipe'))
+        drink.update()
+        current_drinks = Drink.query.order_by(Drink.title).all()
+        drinks = [question.short() for question in current_drinks]
         return jsonify({
             'success': True,
             'drinks': drinks
@@ -86,6 +108,7 @@ def get_drinks_detail(jwt):
     except Exception as e:
         print(e)
         abort(422)
+
 
 '''
 @TODO implement endpoint
