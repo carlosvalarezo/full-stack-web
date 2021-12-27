@@ -1,5 +1,17 @@
 # Coffee Shop Full Stack
 
+## run
+
+In order to run this project, please execute:
+
+`sh start.sh`
+
+This command will:
+- create self sign certificates to be https protocol compliant (required by Auth0)
+- copy the certificates for the frontend to enable the conversation between services (frontend & backend)
+- build two docker images: one for frontend & one for backend with the original commands provided for each service
+- start docker-compose
+
 ## Full Stack Nano - IAM Final Project
 
 Udacity has decided to open a new digitally enabled cafe for students to order drinks, socialize, and study hard. But they need help setting up their menu experience.
